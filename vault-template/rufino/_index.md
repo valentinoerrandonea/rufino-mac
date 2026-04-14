@@ -10,17 +10,17 @@ updated: {{DATE}}
 
 > Este archivo es mantenido automáticamente por Rufino. No editar manualmente.
 
-## Categorias
+## Proyectos
 
-_Aún no hay categorías. Se crean automáticamente al procesar notas._
+_Aún no hay proyectos. Se crean automáticamente al procesar notas._
 
 ## Notas procesadas
 
-| Nota | Categoria | Tags | Resumen | Fecha |
-|------|-----------|------|---------|-------|
+| Nota | Proyecto | Tipo | Tags | Resumen | Fecha |
+|------|----------|------|------|---------|-------|
 
 ## Stats
 
 - Total notas: 0
-- Categorias: 0
+- Proyectos: 0
 - Ultima ejecucion: nunca

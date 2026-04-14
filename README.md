@@ -8,7 +8,7 @@ Rufino has two parts:
 
 1. **Conversational memory** -- Claude Code reads and writes to an Obsidian vault across sessions. It remembers your preferences, project context, decisions, and anything valuable that comes up in conversation.
 
-2. **Automated note processor** -- You drop raw notes (`.md` files) into a `rufino/` folder inside your vault. Every day at 19:00 local time, a cron job processes them: categorizes, analyzes, enriches with context, finds connections to other notes, and organizes them into subdirectories.
+2. **Automated note processor** -- You drop raw notes (`.md` files) into a `rufino/` folder inside your vault. Every day at 19:00 local time, a cron job processes them: detects which project they belong to, assigns a type, analyzes, enriches with context, finds connections to other notes, and organizes them into `rufino/<project>/<type>/` subdirectories. The index (`_index.md`) and tag index (`_tags.md`) are updated automatically after each run.
 
 ## What gets installed
 
@@ -64,7 +64,7 @@ Create any `.md` file in the `rufino/` folder of your vault:
 echo "# Meeting notes\nDiscussed the new API design..." > ~/Documents/vault/rufino/meeting-api.md
 ```
 
-At 19:00, Rufino processes it automatically: adds tags, a structured summary, analysis, context, and connections to other notes. The processed note gets moved to a category subdirectory.
+At 19:00, Rufino processes it automatically: detects the project and type, adds tags, a structured summary, analysis, context, and connections to other notes. The processed note gets moved to `rufino/<project>/<type>/`. The index and tag index are updated.
 
 ### Manual processing
 
@@ -113,10 +113,15 @@ vault/
 ├── sesiones/              # Session logs
 └── rufino/
     ├── _index.md          # Auto-generated index of all notes
+    ├── _tags.md           # Auto-generated tag index
     ├── _processing-log.md # Log of each processing run
     ├── raw-note.md        # Unprocessed notes (you write these)
-    └── tech/              # Category subdirectories (auto-created)
-        └── processed-note.md
+    ├── percha/            # Project subdirectories (auto-created)
+    │   └── tech/          # Type subdirectories within each project
+    │       └── processed-note.md
+    └── general/           # Notes not tied to a specific project
+        └── reflexiones/
+            └── another-note.md
 ```
 
 ## Optional: Obsidian
