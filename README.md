@@ -8,7 +8,7 @@ Rufino has two parts:
 
 1. **Conversational memory** -- Claude Code reads and writes to an Obsidian vault across sessions. It remembers your preferences, project context, decisions, and anything valuable that comes up in conversation.
 
-2. **Automated note processor** -- You drop raw notes (`.md` files) into a `rufino/` folder inside your vault. Every day at 19:00 local time, a cron job processes them: detects which project they belong to, assigns a type, analyzes, enriches with context, finds connections to other notes, and organizes them into `rufino/<project>/<type>/` subdirectories. The index (`_index.md`) and tag index (`_tags.md`) are updated automatically after each run.
+2. **Automated note processor** -- You drop raw notes (`.md` files) into a `rufino/` folder inside your vault. Every day at 19:00 local time, a cron job processes them: detects which project they belong to, assigns a type, analyzes, enriches with context, finds connections to other notes, and organizes them into `rufino/<project>/<type>/` subdirectories. The index (`_index.md`) and tag index (`_tags.md`) are updated automatically after each run. Action items are extracted into `_pendientes.md` and people mentioned in notes are registered in `_people.md`.
 
 ## What gets installed
 
@@ -114,6 +114,8 @@ vault/
 └── rufino/
     ├── _index.md          # Auto-generated index of all notes
     ├── _tags.md           # Auto-generated tag index
+    ├── _pendientes.md     # Auto-extracted action items from notes
+    ├── _people.md         # Directory of people mentioned in notes
     ├── _processing-log.md # Log of each processing run
     ├── raw-note.md        # Unprocessed notes (you write these)
     ├── percha/            # Project subdirectories (auto-created)

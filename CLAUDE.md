@@ -9,7 +9,7 @@ Este archivo contiene las instrucciones completas para instalar Rufino. Claude C
 Rufino es un sistema de memoria personal basado en un vault de Obsidian. Tiene dos componentes:
 
 1. **Memoria conversacional** — Claude recuerda cosas entre sesiones escribiendo notas en el vault.
-2. **Procesador de notas** — Una carpeta `rufino/` donde el usuario tira notas crudas. Un cron job diario las procesa: detecta el proyecto y tipo, analiza, enriquece con contexto, y las organiza automáticamente en `rufino/<proyecto>/<tipo>/`. También actualiza `_index.md` y `_tags.md` con el estado completo de las notas.
+2. **Procesador de notas** — Una carpeta `rufino/` donde el usuario tira notas crudas. Un cron job diario las procesa: detecta el proyecto y tipo, analiza, enriquece con contexto, y las organiza automáticamente en `rufino/<proyecto>/<tipo>/`. También actualiza `_index.md`, `_tags.md`, `_pendientes.md` (action items extraídos automáticamente), y `_people.md` (directorio de personas mencionadas en las notas).
 
 ---
 
@@ -62,6 +62,8 @@ Archivos a copiar:
 - `vault-template/rufino/_index.md` → `$VAULT_PATH/rufino/_index.md`
 - `vault-template/rufino/_tags.md` → `$VAULT_PATH/rufino/_tags.md`
 - `vault-template/rufino/_processing-log.md` → `$VAULT_PATH/rufino/_processing-log.md`
+- `vault-template/rufino/_pendientes.md` → `$VAULT_PATH/rufino/_pendientes.md`
+- `vault-template/rufino/_people.md` → `$VAULT_PATH/rufino/_people.md`
 
 Creá los directorios vacíos:
 ```bash
@@ -177,6 +179,8 @@ echo "Vault:"
 [ -f "$VAULT_PATH/stack.md" ] && echo "  ✓ stack.md" || echo "  ✗ stack.md falta"
 [ -f "$VAULT_PATH/rufino/_index.md" ] && echo "  ✓ rufino/_index.md" || echo "  ✗ rufino/_index.md falta"
 [ -f "$VAULT_PATH/rufino/_tags.md" ] && echo "  ✓ rufino/_tags.md" || echo "  ✗ rufino/_tags.md falta"
+[ -f "$VAULT_PATH/rufino/_pendientes.md" ] && echo "  ✓ rufino/_pendientes.md" || echo "  ✗ rufino/_pendientes.md falta"
+[ -f "$VAULT_PATH/rufino/_people.md" ] && echo "  ✓ rufino/_people.md" || echo "  ✗ rufino/_people.md falta"
 [ -d "$VAULT_PATH/_meta" ] && echo "  ✓ _meta/" || echo "  ✗ _meta/ falta"
 echo ""
 echo "Claude Code configs:"
