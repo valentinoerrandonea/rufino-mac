@@ -33,7 +33,7 @@ Rufino has two parts:
 
 1. Clone this repo:
    ```bash
-   git clone https://github.com/yourusername/rufino-mac.git
+   git clone https://github.com/valentinoerrandonea/rufino-mac.git
    cd rufino-mac
    ```
 
