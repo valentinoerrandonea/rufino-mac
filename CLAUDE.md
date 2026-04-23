@@ -166,7 +166,36 @@ crontab -l 2>/dev/null | grep -q "rufino-cron" && echo "Cron ya existe" || (cron
 
 Reemplazá `<HORA_UTC>` con la hora calculada.
 
-### Paso 11: Verificar instalación
+### Paso 11: Instalar el dashboard (opcional pero recomendado)
+
+Preguntá al usuario: **"¿Querés instalar el dashboard web también? (corre en localhost:3737 como daemon, siempre activo al bootear)"**
+
+Si responde que no, saltate al Paso 12.
+
+Si responde que sí:
+
+**Prerrequisito**: Node.js 20+. Verificalo:
+
+```bash
+command -v node >/dev/null && NODE_MAJOR=$(node -v | sed 's/v//' | cut -d. -f1) && [ "$NODE_MAJOR" -ge 20 ]
+```
+
+Si no está o la versión es menor, avisá al usuario y sugerile: `brew install node` o descargar de https://nodejs.org. Esperá a que lo instale antes de continuar.
+
+Ejecutá el script de instalación del dashboard desde la raíz del repo. El script hace `npm install`, `npm run build`, genera el LaunchAgent plist con los paths correctos, y lo carga:
+
+```bash
+REPO_DIR="$(pwd)"
+bash "$REPO_DIR/configs/scripts/install-dashboard.sh" "$REPO_DIR/dashboard" "$VAULT_PATH"
+```
+
+El script verifica que el daemon arrancó y responde en http://localhost:3737. Si falla, mostrá los logs:
+
+```bash
+tail -30 ~/rufino-dashboard.log ~/rufino-dashboard.err.log
+```
+
+### Paso 12: Verificar instalación
 
 Verificá que todo esté en su lugar:
 
@@ -195,10 +224,14 @@ echo ""
 echo "Cron:"
 crontab -l 2>/dev/null | grep -q "rufino-cron" && echo "  ✓ Cron job configurado" || echo "  ✗ Cron job NO encontrado"
 echo ""
+echo "Dashboard (si se instaló):"
+launchctl list | grep -q "com.rufino.dashboard" && echo "  ✓ LaunchAgent com.rufino.dashboard cargado" || echo "  - Dashboard no instalado (opcional)"
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3737 2>/dev/null | grep -q "200" && echo "  ✓ Dashboard respondiendo en http://localhost:3737" || echo "  - Dashboard no responde en 3737"
+echo ""
 echo "=== Fin de verificación ==="
 ```
 
-### Paso 12: Mensaje final
+### Paso 13: Mensaje final
 
 Mostrá este mensaje al usuario:
 
@@ -212,6 +245,10 @@ Mostrá este mensaje al usuario:
 > - En cualquier sesión de Claude Code, podés decir "procesá rufino ahora" para ejecutar manualmente.
 > - Usá `/remember` para guardar algo en el vault durante una conversación.
 > - Claude va a leer tu vault automáticamente al inicio de cada conversación para tener contexto.
+>
+> **Dashboard (si lo instalaste):**
+> - Corre en http://localhost:3737 como daemon. Se relanza solo si se cae y arranca al bootear la Mac.
+> - Después de editar código en `dashboard/`, hacé `npm run build` + `launchctl kickstart -k gui/$(id -u)/com.rufino.dashboard` para recompilar y reiniciar.
 >
 > **Recomendación:** Para una mejor experiencia navegando tus notas, instalá [Obsidian](https://obsidian.md) y abrí la carpeta `<VAULT_PATH>` como un vault de Obsidian. Es opcional pero recomendado.
 
