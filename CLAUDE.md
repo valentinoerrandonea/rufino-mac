@@ -71,6 +71,7 @@ mkdir -p "$VAULT_PATH/_templates"
 mkdir -p "$VAULT_PATH/proyectos"
 mkdir -p "$VAULT_PATH/sesiones"
 mkdir -p "$VAULT_PATH/rufino"
+mkdir -p "$VAULT_PATH/rufino/_people"
 ```
 
 **IMPORTANTE**: Si el vault ya existe y tiene archivos, NO sobreescribas archivos existentes. Solo copiá los que falten. Avisá al usuario qué archivos ya existían y se saltearon.

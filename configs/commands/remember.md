@@ -1,137 +1,273 @@
 # Manual Operativo: /remember
 
-## 1. Flow de escritura
+Este es el manual operativo para escribir memorias en el vault de Obsidian ubicado en `{{VAULT_PATH}}/`. Cuando se invoca `/remember`, estas instrucciones determinan exactamente cómo leer, crear y actualizar notas.
 
-Cuando necesites guardar información en el vault, seguí este flujo:
+---
 
-### 1.1 Determinar tipo de nota
+## 1. Flujo de Ejecución
 
-| Tipo | Archivo destino | Cuándo usarlo |
-|------|----------------|---------------|
-| Perfil | `{{VAULT_PATH}}/perfil.md` | Info sobre el usuario: nombre, rol, background, responsabilidades |
-| Preferencia | `{{VAULT_PATH}}/preferencias.md` | Cómo le gusta trabajar, estilo de código, convenciones, comportamiento de Claude |
-| Stack | `{{VAULT_PATH}}/stack.md` | Tecnologías, lenguajes, frameworks, herramientas |
-| Proyecto overview | `{{VAULT_PATH}}/proyectos/<proyecto>/overview.md` | Contexto de un proyecto: qué es, estado, equipo, stack |
-| Decisión | `{{VAULT_PATH}}/proyectos/<proyecto>/decisiones/<nombre>.md` | Decisión técnica o arquitectónica con contexto |
-| Aprendizaje | `{{VAULT_PATH}}/proyectos/<proyecto>/aprendizajes/<nombre>.md` | Algo aprendido durante debugging, investigación, o implementación |
-| Feedback | `{{VAULT_PATH}}/proyectos/<proyecto>/feedback/<nombre>.md` | Corrección que el usuario hizo, algo que no le gustó |
-| Sesión | `{{VAULT_PATH}}/sesiones/<fecha>-<tema>.md` | Resumen de una sesión larga con contexto importante |
-| Project paths | `{{VAULT_PATH}}/_meta/projectPaths.md` | Mapeo de directorios a proyectos |
+Seguir estos pasos en orden cada vez que se necesite guardar información:
 
-### 1.2 Verificar existencia
+### Paso 1 — Determinar el tipo de nota
 
-Antes de escribir:
-1. Verificá si el archivo ya existe (leelo con Read)
-2. Si existe, actualizá la sección relevante — NO sobreescribas todo el archivo
-3. Si no existe, crealo con la template correspondiente
+Clasificar la información según uno de estos tipos:
 
-### 1.3 Escribir la nota
+| Tipo | Cuándo usarlo |
+|------|---------------|
+| `perfil` | Quién es Val: datos personales, contexto profesional, forma de pensar |
+| `preferencia` | Cómo le gusta trabajar: herramientas favoritas, flujos, opiniones sobre tecnologías |
+| `stack` | Herramientas y tecnologías que usa: lenguajes, frameworks, servicios |
+| `proyectoOverview` | Descripción general de un proyecto: qué es, estado, equipo, stack |
+| `decision` | Una decisión técnica o de producto tomada en un proyecto |
+| `aprendizaje` | Algo descubierto: un bug resuelto, un concepto entendido, una lección aprendida |
+| `feedback` | Una corrección, confirmación o preferencia expresada explícitamente por Val |
+| `sesion` | Resumen de lo que se hizo durante una sesión de trabajo |
 
-Usá Write o Edit según corresponda. Siempre preservá el contenido existente.
+### Paso 2 — Buscar si ya existe una nota relacionada
 
-## 2. Reglas de comportamiento
+Antes de crear nada, siempre buscar primero:
 
-### 2.1 Qué guardar SIEMPRE (sin que te lo pidan)
+```
+# Buscar por nombre de archivo
+Glob("**/*.md", path="{{VAULT_PATH}}/")
 
-- Primera mención del nombre, rol, o background del usuario
-- Preferencias explícitas ("me gusta X", "no me gusta Y", "siempre hacé Z")
-- Correcciones ("no, hacelo así", "eso está mal", "preferí X sobre Y")
-- Decisiones técnicas con contexto ("elegimos X porque Y")
-- Soluciones no obvias de debugging
-- Stack tecnológico mencionado
-- Proyectos nuevos detectados por CWD
+# Buscar por contenido relevante
+Grep(pattern="<término clave>", path="{{VAULT_PATH}}/", glob="**/*.md")
+```
 
-### 2.2 Qué NO guardar
+Si se conoce el proyecto o tema, buscar también dentro del directorio específico:
 
-- Conversación trivial sin valor informativo
-- Código específico (guardá la decisión/patrón, no el código entero)
-- Información temporal sin valor futuro ("hacé un console.log acá")
-- Duplicados de algo que ya está en el vault
+```
+Glob("**/*.md", path="{{VAULT_PATH}}/proyectos/<nombre>/")
+```
 
-### 2.3 Cuándo guardar
+### Paso 3 — Si la nota existe: actualizar
 
-- **Inmediatamente** cuando detectás información valiosa — no esperes al final
-- **Al detectar un proyecto nuevo** (CWD no está en projectPaths.md)
-- **Cuando el usuario dice explícitamente** "recordá esto", "guardá esto", etc.
-- **Al final de sesiones largas** con mucho contexto nuevo (el hook te lo recuerda)
+1. Leer la nota existente con `Read`
+2. Identificar qué sección debe cambiar o qué información agregar
+3. Usar `Edit` para hacer cambios precisos — no reescribir si no es necesario
+4. Actualizar el campo `updated` en el frontmatter con la fecha de hoy (formato `YYYY-MM-DD`)
+5. Las notas son documentos vivos: reestructurar, expandir y mejorar según convenga
 
-### 2.4 Cómo actualizar
+### Paso 4 — Si no existe: crear
 
-- Si la info ya existe pero cambió: buscá la nota, editá la sección relevante
-- Si es info nueva sobre algo existente: agregá a la nota existente
-- Nunca borres información previa — agregá o actualizá
+1. Determinar el directorio correcto según la estructura del vault (ver sección 3)
+2. Si es el primer archivo de un proyecto nuevo, crear antes los directorios necesarios:
+   - `proyectos/<nombre>/`
+   - `proyectos/<nombre>/decisiones/`
+   - `proyectos/<nombre>/aprendizajes/`
+3. Elegir el template correcto (ver sección 6)
+4. Usar `Write` para crear la nota con el contenido completo
+5. Nombre de archivo en camelCase (ver sección 4)
 
-## 3. Estructura de directorios
+### Paso 5 — Detectar personas y conceptos
+
+Al crear o actualizar una nota, revisá si menciona:
+
+**Personas:**
+1. Si aparece un nombre, buscar `{{VAULT_PATH}}/rufino/_people/<nombre>.md`
+2. Si existe el archivo: agregar tag `persona/<nombre>` a la nota, y agregar la nota a la sección "Menciones en notas" del archivo de la persona
+3. Si NO existe: preguntar al usuario quién es (nombre, relación, proyectos) y crear el archivo. Después actualizar el índice `_people.md`
+
+**Conceptos técnicos:**
+Escanear la nota por entidades técnicas específicas (herramientas, técnicas, tecnologías con nombre propio). Para cada concepto identificado, agregar tag `concepto/<nombre-kebab-case>`.
+
+Regla: concepto es algo que alguien googlearía la primera vez que lo viera.
+
+### Paso 6 — Actualizar wikilinks
+
+Después de crear o modificar una nota:
+
+1. Pensar: ¿qué otras notas del vault deberían referenciar esta nota nueva/actualizada?
+2. Buscar esas notas con `Glob` o `Grep`
+3. Leerlas y agregar `[[wikilink]]` en su sección `Relacionado:` si aún no está
+4. Agregar también wikilinks inline en el cuerpo del texto cuando la referencia sea natural
+
+---
+
+## 2. Reglas de Comportamiento
+
+- **Silencioso por defecto**: No anunciar cada escritura. Solo mencionarlo si es relevante para el flujo de la conversación.
+- **Actualizar antes que crear**: Siempre buscar notas existentes antes de crear una nueva. Si ya existe una nota sobre el mismo tema, actualizarla.
+- **Documentos vivos**: Las notas no son append-only. Editar, reestructurar y mejorar según la información evolucione.
+- **Idioma**: Español para el contenido. Inglés para términos técnicos sin traducción natural (stack, hook, middleware, API, render, deploy, etc.).
+- **Fechas en frontmatter**: Siempre poner `created` al crear. Siempre actualizar `updated` al editar.
+- **Crear directorios de proyecto on demand**: Al escribir la primera nota de un proyecto nuevo, crear `proyectos/<nombre>/`, `proyectos/<nombre>/decisiones/`, `proyectos/<nombre>/aprendizajes/`.
+
+---
+
+## 3. Estructura de Directorios
 
 ```
 {{VAULT_PATH}}/
-├── perfil.md                    # Perfil del usuario
-├── preferencias.md              # Preferencias de trabajo
-├── stack.md                     # Stack tecnológico
-├── _meta/
-│   ├── design.md                # Diseño del sistema del vault
-│   └── projectPaths.md          # Mapeo CWD → proyecto
-├── _templates/                  # Templates para nuevas notas
+├── _meta/                          # Documentación del sistema del vault
+├── _templates/                     # Templates de notas (referencia)
+├── perfil.md                       # Quién es Val
+├── preferencias.md                 # Cómo le gusta trabajar
+├── stack.md                        # Herramientas y tecnologías
 ├── proyectos/
-│   └── <nombre-proyecto>/
-│       ├── overview.md          # Contexto del proyecto
-│       ├── decisiones/
-│       │   └── <nombre>.md      # Decisiones técnicas
-│       ├── aprendizajes/
-│       │   └── <nombre>.md      # Aprendizajes
-│       └── feedback/
-│           └── <nombre>.md      # Feedback del usuario
-├── sesiones/
-│   └── <fecha>-<tema>.md        # Resúmenes de sesión
-└── rufino/
-    ├── _index.md                # Índice auto-generado
-    ├── _processing-log.md       # Log de procesamiento
-    └── <categoría>/             # Notas procesadas
-        └── <nota>.md
+│   ├── <nombre>/                   # Una carpeta por proyecto
+│   │   ├── overview.md             # Descripción general del proyecto
+│   │   ├── decisiones/
+│   │   │   └── <decisionNombre>.md
+│   │   └── aprendizajes/
+│   │       └── <aprendizajeNombre>.md
+│   └── ...
+└── sesiones/
+    └── <YYYY-MM-DD-tema>.md        # Una nota por sesión de trabajo
 ```
 
-## 4. Naming conventions
+### Dónde va cada tipo de nota
 
-### 4.1 Archivos
+| Tipo | Ruta |
+|------|------|
+| `perfil` | `{{VAULT_PATH}}/perfil.md` |
+| `preferencia` | `{{VAULT_PATH}}/preferencias.md` |
+| `stack` | `{{VAULT_PATH}}/stack.md` |
+| `proyectoOverview` | `{{VAULT_PATH}}/proyectos/<nombre>/overview.md` |
+| `decision` | `{{VAULT_PATH}}/proyectos/<nombre>/decisiones/<decisionNombre>.md` |
+| `aprendizaje` | `{{VAULT_PATH}}/proyectos/<nombre>/aprendizajes/<aprendizajeNombre>.md` |
+| `feedback` | `{{VAULT_PATH}}/preferencias.md` (sección de feedback) o nota separada si es sustancial |
+| `sesion` | `{{VAULT_PATH}}/sesiones/<YYYY-MM-DD-tema>.md` |
 
-- Minúsculas, separados por guiones: `mi-decision-importante.md`
-- Sin espacios, sin caracteres especiales
-- Descriptivo pero conciso: `auth-jwt-vs-session.md`, no `decision-1.md`
-- Sesiones: `YYYY-MM-DD-tema.md`
+---
 
-### 4.2 Proyectos
+## 4. Nombres de Archivo
 
-- Usar el nombre del repositorio o el nombre corto del proyecto
-- Minúsculas: `percha`, `rufino-mac`, `mi-api`
+### Reglas
 
-## 5. Taxonomía de tags
+- **camelCase** para todos los nombres de archivo
+- **Lowercase** para nombres de carpetas de proyectos
+- **Prefijo de fecha** solo para sesiones
 
-### 5.1 Ejes principales
+### Ejemplos correctos
 
-| Eje | Ejemplos | Uso |
-|-----|----------|-----|
-| `tipo/` | `tipo/decision`, `tipo/aprendizaje`, `tipo/feedback`, `tipo/perfil`, `tipo/preferencia`, `tipo/stack`, `tipo/sesion`, `tipo/meta` | Clasificar qué tipo de nota es |
-| `proyecto/` | `proyecto/percha`, `proyecto/rufino` | Asociar a un proyecto |
-| `tema/` | `tema/auth`, `tema/db`, `tema/deploy`, `tema/ai`, `tema/arquitectura` | Tema técnico o conceptual |
-| `estado/` | `estado/activo`, `estado/archivado`, `estado/pendiente` | Estado actual |
+```
+# Decisiones
+decisionSupabaseAuth.md
+decisionMigrarANextjs.md
+decisionArquitecturaMonorepo.md
 
-### 5.2 Reglas de tags
+# Aprendizajes
+aprendizajeRaceConditionWebsocket.md
+aprendizajeCachingConRedis.md
+aprendizajeDebuggingMemoryLeak.md
 
-- Mínimo 2 tags por nota (tipo + al menos uno más)
-- Usar tags existentes antes de crear nuevos
-- Tags en minúsculas, sin espacios
-- Axis siempre como prefijo: `tipo/`, `proyecto/`, `tema/`, `estado/`
+# Proyectos (carpetas en lowercase)
+proyectos/umbru/
+proyectos/cortex/
+proyectos/claudeSetup/
+proyectos/miProyecto/
 
-## 6. Templates de notas
+# Sesiones (fecha + tema en camelCase)
+2026-04-13-sistemaDeNotificaciones.md
+2026-04-14-refactorAuthModule.md
+```
 
-### 6.1 Proyecto overview
+---
+
+## 5. Taxonomía de Tags — 4 ejes
+
+Usar siempre los ejes que apliquen. Cada nota debería tener 4-8 tags distribuidos entre los ejes.
+
+### Eje proyecto/
+Identifica a qué proyecto pertenece la nota. Incluir la arista (sub-área) cuando aplique.
+
+```
+proyecto/umbru
+proyecto/oiko/producto
+proyecto/oiko/infraestructura
+proyecto/percha/ml
+proyecto/telus/rpa-sap
+proyecto/rufino/infraestructura
+```
+
+### Eje tema/
+Identifica el área técnica o temática amplia.
+
+```
+tema/arquitectura
+tema/frontend
+tema/backend
+tema/auth
+tema/testing
+tema/devops
+tema/performance
+tema/ux
+tema/database
+tema/api
+tema/infra
+tema/seguridad
+tema/ai
+tema/mobile
+tema/tooling
+tema/finanzas
+tema/productividad
+tema/negocios
+```
+
+### Eje persona/
+Identifica personas involucradas en la nota (decisión tomada con alguien, aprendizaje de alguien, feedback de alguien, etc.).
+
+```
+persona/alejo
+persona/gabi
+persona/piero
+persona/mati
+persona/juan
+persona/meli
+persona/diego
+```
+
+Si mencionás una persona nueva: crear el archivo `{{VAULT_PATH}}/rufino/_people/<nombre>.md` y agregar al índice `{{VAULT_PATH}}/rufino/_people.md`.
+
+### Eje concepto/
+Identifica conceptos técnicos o específicos que aparecen en la nota. Un concepto es algo que buscarías en Google si lo vieras por primera vez.
+
+```
+concepto/embeddings
+concepto/rls
+concepto/mlx
+concepto/polling-visual
+concepto/supabase
+concepto/docker-compose
+concepto/nextjs-app-router
+concepto/rag
+```
+
+**Regla:** no usar conceptos amplios como `concepto/arquitectura` (eso va en `tema/`). Los conceptos son específicos: herramientas, técnicas, nombres propios de tecnología.
+
+---
+
+## 6. Templates de Notas
+
+### Template: Perfil / Preferencias / Stack
+Para las notas raíz globales (`perfil.md`, `preferencias.md`, `stack.md`).
 
 ```markdown
 ---
 tags:
-  - tipo/overview
+  - tipo/perfil
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+---
+
+# Título
+
+Contenido organizado por secciones relevantes.
+
+---
+Relacionado: [[nota1]] | [[nota2]]
+```
+
+### Template: Overview de proyecto
+Para `proyectos/<nombre>/overview.md`.
+
+```markdown
+---
+tags:
   - proyecto/<nombre>
-  - estado/activo
+  - tipo/overview
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
@@ -139,117 +275,99 @@ updated: YYYY-MM-DD
 # <Nombre del proyecto>
 
 ## Qué es
-<Descripción en una o dos oraciones>
-
-## Estado
-<Estado actual: en desarrollo, producción, idea, etc.>
 
 ## Stack
-<Tecnologías principales>
+
+## Estado actual
 
 ## Equipo
-<Quién trabaja en esto>
 
-## Decisiones clave
-<Links a decisiones importantes>
-
-## Links
-<URLs relevantes: repo, deploy, docs>
+## Notas
 
 ---
-Relacionado: [[perfil]] | [[stack]]
+Relacionado: [[stack]] | [[perfil]]
 ```
 
-### 6.2 Decisión
+### Template: Decisión
+Para `proyectos/<nombre>/decisiones/<decisionNombre>.md`.
 
 ```markdown
 ---
 tags:
-  - tipo/decision
   - proyecto/<nombre>
+  - tipo/decision
   - tema/<tema>
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
 
-# <Título de la decisión>
+# Decisión: <título descriptivo>
 
 ## Contexto
-<Por qué surgió esta decisión>
 
 ## Opciones consideradas
-| Opción | Pros | Contras |
-|--------|------|---------|
-| A | ... | ... |
-| B | ... | ... |
 
 ## Decisión
-<Qué se eligió y por qué>
 
 ## Consecuencias
-<Qué implica esta decisión>
 
 ---
-Relacionado: [[proyectos/<proyecto>/overview]]
+Relacionado: [[<nombre>Overview]] | [[otras notas]]
 ```
 
-### 6.3 Aprendizaje
+### Template: Aprendizaje
+Para `proyectos/<nombre>/aprendizajes/<aprendizajeNombre>.md`.
 
 ```markdown
 ---
 tags:
-  - tipo/aprendizaje
   - proyecto/<nombre>
+  - tipo/aprendizaje
   - tema/<tema>
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
 
-# <Qué se aprendió>
-
-## Contexto
-<Qué estaba pasando cuando surgió>
+# <Título descriptivo>
 
 ## Problema
-<Qué no funcionaba o qué se descubrió>
+
+## Qué descubrimos
 
 ## Solución
-<Cómo se resolvió>
 
-## Lección
-<Qué recordar para la próxima>
+## Para recordar
 
 ---
-Relacionado: [[proyectos/<proyecto>/overview]]
+Relacionado: [[notas relacionadas]]
 ```
 
-### 6.4 Feedback
+### Template: Feedback
+Para notas de feedback cuando es sustancial. Las pequeñas correcciones van en `preferencias.md`.
 
 ```markdown
 ---
 tags:
   - tipo/feedback
-  - proyecto/<nombre>
+  - tema/<tema>
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
 
-# <Resumen del feedback>
+# Feedback: <qué pasó>
 
-## Qué pasó
-<Contexto: qué hizo Claude que generó la corrección>
+## Corrección / Confirmación
 
-## Corrección
-<Qué dijo el usuario>
+## Por qué importa
 
-## Acción
-<Qué cambiar en el comportamiento futuro>
+## Cómo aplicarlo
 
 ---
-Relacionado: [[preferencias]]
+Relacionado: [[preferencias]] | [[otras notas]]
 ```
 
-### 6.5 Sesión
+### Template: Sesión
+Para `sesiones/<YYYY-MM-DD-tema>.md`.
 
 ```markdown
 ---
@@ -262,54 +380,66 @@ updated: YYYY-MM-DD
 
 # Sesión: <tema principal>
 
-## Resumen
-<Qué se hizo en la sesión>
+## Qué hicimos
 
 ## Decisiones tomadas
-<Lista de decisiones>
 
 ## Pendientes
-<Qué quedó por hacer>
 
-## Contexto para la próxima sesión
-<Qué necesita saber Claude la próxima vez>
+## Notas guardadas esta sesión
 
 ---
-Relacionado: [[proyectos/<proyecto>/overview]]
+Relacionado: [[notas creadas/editadas]]
 ```
 
-## 7. Convenciones de wikilinks
+---
 
-- Usar wikilinks de Obsidian: `[[nombre-archivo]]`
-- Para archivos en subdirectorios: `[[proyectos/mi-proyecto/overview]]`
-- Siempre verificar que el archivo destino EXISTE antes de linkear
-- Nunca fabricar links a archivos inexistentes
-- Al final de cada nota, agregar una sección `Relacionado:` con links relevantes
+## 7. Convenciones de Wikilinks
 
-## 8. Quick Reference
+### Sección Relacionado
+Siempre incluir al final de cada nota una sección `Relacionado:` con links a notas relacionadas:
 
-### Checklist antes de escribir
+```markdown
+---
+Relacionado: [[perfil]] | [[stack]] | [[umbruOverview]]
+```
 
-- [ ] Determiné el tipo de nota correcto
-- [ ] Verifiqué si el archivo ya existe
-- [ ] Si existe, voy a actualizar (no sobreescribir)
-- [ ] El nombre del archivo sigue las convenciones
-- [ ] Incluí frontmatter con tags, created, updated
-- [ ] Los tags siguen la taxonomía (tipo/, proyecto/, tema/, estado/)
-- [ ] Agregué wikilinks a notas relacionadas que EXISTEN
-- [ ] La información es valiosa para futuras sesiones
+- Usar `|` como separador entre links
+- Incluir entre 1 y 5 links relevantes
+- No poner links vacíos o placeholders
 
-### Checklist al detectar proyecto nuevo
+### Wikilinks inline
+Usar `[[wikilink]]` dentro del cuerpo del texto cuando se hace referencia natural a otra nota:
 
-- [ ] Creé `{{VAULT_PATH}}/proyectos/<nombre>/overview.md`
-- [ ] Agregué el path a `{{VAULT_PATH}}/_meta/projectPaths.md`
-- [ ] Creé directorios: `decisiones/`, `aprendizajes/`, `feedback/`
+```markdown
+Esta decisión surgió del trabajo en [[umbruOverview]] y afecta la forma en que
+manejamos auth, similar a lo documentado en [[decisionSupabaseAuth]].
+```
 
-### Checklist al final de sesión (trigger: hook)
+### Links bidireccionales
+Al crear una nota nueva, verificar si notas existentes deberían referenciarla:
 
-- [ ] ¿Hubo preferencias nuevas? → Actualizar `preferencias.md`
-- [ ] ¿Hubo decisiones técnicas? → Crear nota de decisión
-- [ ] ¿Hubo correcciones/feedback? → Crear nota de feedback
-- [ ] ¿Hubo aprendizajes de debugging? → Crear nota de aprendizaje
-- [ ] ¿Se mencionó stack nuevo? → Actualizar `stack.md`
-- [ ] ¿Se mencionó info personal nueva? → Actualizar `perfil.md`
+1. Buscar notas del mismo proyecto
+2. Buscar notas del mismo tema
+3. Leer las candidatas y agregar el wikilink en su sección `Relacionado:` si corresponde
+
+---
+
+## 8. Referencia Rápida
+
+### Checklist al crear una nota nueva
+- [ ] Tipo identificado
+- [ ] Búsqueda de duplicados realizada
+- [ ] Directorio correcto
+- [ ] Nombre de archivo en camelCase
+- [ ] Template correcto aplicado
+- [ ] Tags correctos (proyecto/ + tema/ + concepto/ + persona/ según aplique)
+- [ ] Fechas `created` y `updated` con la fecha de hoy
+- [ ] Sección `Relacionado:` con wikilinks
+- [ ] Notas existentes actualizadas con link de vuelta
+
+### Checklist al actualizar una nota existente
+- [ ] Nota leída antes de editar
+- [ ] Campo `updated` actualizado a hoy
+- [ ] Edición precisa con `Edit` (no reescribir todo)
+- [ ] Wikilinks nuevos agregados si aplica
